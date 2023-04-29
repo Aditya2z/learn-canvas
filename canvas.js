@@ -1,21 +1,47 @@
 var canvas = document.querySelector("canvas");
+
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 var c = canvas.getContext("2d");
 
-function Circle(x, y, dx, dy,radius) {
+var mouse = {
+    x: undefined,
+    y: undefined,
+}
+
+function handleMouseMove(event) {
+    mouse.x = event.x;
+    mouse.y = event.y;
+}
+
+window.addEventListener("mousemove", handleMouseMove);
+
+function Circle(x, y, dx, dy, radius, colorIndex) {
     this.x = x;
     this.y = y;
     this.dx = dx;
     this.dy = dy;
     this.radius = radius;
+    this.minRadius = radius;
+    this.colorIndex = colorIndex;
 
     this.draw = function () {
         c.beginPath();
         c.arc(this.x,this.y,this.radius, Math.PI * 2, false);
-        c.strokeStyle = "blue";
+        c.strokeStyle =`blue`;
         c.stroke();
+        switch (this.colorIndex % 3) {
+            case 0:
+                c.fillStyle = "Tomato";
+                break;
+            case 1:
+                c.fillStyle = "rgba(0,155,155,1)";
+                break;
+            case 2:
+                c.fillStyle = "black";
+                break;
+        }
         c.fill();
     }
 
@@ -30,21 +56,29 @@ function Circle(x, y, dx, dy,radius) {
         this.x += this.dx;
         this.y += this.dy;
 
+        // Interactivity
+        if(mouse.x - this.x < 50 && mouse.x - this.x > -50 &&
+             mouse.y - this.y < 50 && mouse.y - this.y > -50 && this.radius < 40) {
+            this.radius += 1;
+        } else if(this.radius > this.minRadius) {
+            this.radius -= 1;
+        }
+
         this.draw();
     }
 }
 
 var circleArray = [];
 
-for(let i = 0; i < 100; i++) {
-    let radius = 30;
+for(let i = 0; i < 200; i++) {
+    let radius = Math.random() * 20;
 
     let x = Math.random() * (window.innerWidth - radius * 2) + radius;
     let y = Math.random() * (window.innerHeight - radius * 2) + radius;
     let dx = (Math.random() - .5);
     let dy = (Math.random() - .5);
 
-    circleArray.push(new Circle(x,y,dx,dy,radius));
+    circleArray.push(new Circle(x, y, dx, dy, radius, i));
 }
 
 function animate() {
